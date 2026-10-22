@@ -13,6 +13,15 @@ from .core import (ValidationError, assess_packet, atomic_write, capture_check,
                    fingerprint_files, packet_bytes, render_report, validate_packet)
 
 
+def _protect_inputs(output, sources):
+    if output is None:
+        return
+    destination = Path(output).resolve()
+    for source in sources:
+        if source is not None and destination == Path(source).resolve():
+            raise ValidationError("output must not overwrite an input file; choose a separate report path")
+
+
 def _json_file(path: Path) -> dict:
     try:
         with path.open("r", encoding="utf-8") as stream:
@@ -77,6 +86,7 @@ def _parser() -> argparse.ArgumentParser:
 
 def _execute(args: argparse.Namespace) -> int:
     if args.command == "init":
+        _protect_inputs(args.out, [args.task, args.claims, *[args.root / name for name in args.path]])
         task = _read_text(args.task, "task")
         source = _json_file(args.claims)
         if type(source.get("schema_version")) is not int or source.get("schema_version") != 1:
@@ -130,11 +140,13 @@ def _execute(args: argparse.Namespace) -> int:
         return 0
     if args.command == "verify":
         packet = _load_packet(args.packet)
+        _protect_inputs(args.out, [args.packet, *[args.root / item["path"] for item in packet["selected_paths"]]])
         assessment = assess_packet(packet, args.root)
         atomic_write(args.out, (json.dumps(assessment, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8"))
         return 1 if assessment["adverse"] else 0
     if args.command == "report":
         packet = _load_packet(args.packet)
+        _protect_inputs(args.out, [args.packet, *[args.root / item["path"] for item in packet["selected_paths"]]])
         assessment = assess_packet(packet, args.root)
         atomic_write(args.out, render_report(packet, assessment).encode("utf-8"))
         return 0

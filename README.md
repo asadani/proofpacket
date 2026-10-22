@@ -81,7 +81,7 @@ Expected input errors go to stderr without a traceback. JSON is written only to 
 
 Proofpacket hashes original file bytes with SHA-256. For each check it snapshots every selected file immediately before and after command execution. A selected file changed during execution gets `changed_during_run`, which takes precedence over current and stale outcomes. At review time, missing or unreadable selected files are `unavailable`; differing current bytes are `stale`; otherwise evidence is `current`. A current check counts as passing only when it completed with exit code `0`.
 
-Paths are relative to the runtime `--root` (current directory by default), and symlinks resolving outside that root are rejected. The root itself is not stored in the portable packet. Commands run as the current user and are not sandboxed. Only an explicit `run ... -- command args...` executes a process; packet JSON never triggers execution.
+Paths are relative to the runtime `--root` (current directory by default), and symlinks resolving outside that root are rejected. The root itself is not stored in the portable packet. Commands run as the current user and are not sandboxed. On POSIX, a timeout terminates the command’s process group; on other platforms it terminates the direct process. Descendants that deliberately detach are outside this capture tool’s control. Only an explicit `run ... -- command args...` executes a process; packet JSON never triggers execution.
 
 **Limitations:** a passing command does not prove a behavioral claim. Claim links are author assertions. Whole-file hashing intentionally marks unrelated edits within selected files stale. The selected list cannot reveal undeclared inputs, runtime environment or dependency changes, or edits outside its scope. Output excerpts preserve the first 65,536 decoded characters per stream, with replacement for malformed UTF-8; SHA-256 covers the full captured bytes. Subprocess output is collected in memory, so capture is intended for ordinary bounded tests, not unbounded streaming output. There is no Git integration, sandbox, CI import, signature, automatic test discovery, or semantic analysis.
 
@@ -92,3 +92,9 @@ python -m unittest discover -s tests -v
 ```
 
 The package has no runtime dependencies. Core API entry points are `fingerprint_files`, `validate_packet`, `capture_check`, `assess_packet`, and `render_report` in `proofpacket.core`.
+
+## Data integrity
+
+Report and initialization outputs refuse to overwrite their input artifacts or selected source files. Packet changes happen only through the explicit initialization, run, and link operations.
+
+See [verification coverage](docs/VERIFICATION.md) and [the design plan](docs/PLAN.md) for tested behavior and remaining limits.

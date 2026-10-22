@@ -8,6 +8,7 @@ import math
 import math
 import os
 import re
+import signal
 import subprocess
 import tempfile
 from datetime import datetime, timezone
@@ -183,7 +184,7 @@ def capture_check(root: Path, paths: list[str], check_id: str, argv: list[str], 
     started = _now()
     try:
         proc = subprocess.Popen(argv, cwd=root.resolve(strict=True), stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE, shell=False)
+                                stderr=subprocess.PIPE, shell=False, start_new_session=(os.name == "posix"))
     except (OSError, ValueError) as exc:
         raise ValidationError(f"could not launch command: {exc}") from exc
     status, exit_code = "completed", 0
@@ -192,7 +193,14 @@ def capture_check(root: Path, paths: list[str], check_id: str, argv: list[str], 
         exit_code = proc.returncode
     except subprocess.TimeoutExpired:
         status, exit_code = "timeout", None
-        proc.kill()
+        if os.name == "posix":
+            # Ordinary child processes inherit this session; close their output pipes too.
+            try:
+                os.killpg(proc.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+        else:
+            proc.kill()
         out, err = proc.communicate()
     finished = _now()
     after: dict[str, str | None] = {}
