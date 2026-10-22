@@ -17,3 +17,6 @@ proofpacket = "proofpacket.__main__:main"
 
 [tool.setuptools.packages.find]
 include = ["proofpacket*"]
+
+[tool.setuptools.package-data]
+"*" = ["web/*.css", "web/*.js", "assets/*.css", "assets/*.js", "*.css", "*.js", "*.json"]

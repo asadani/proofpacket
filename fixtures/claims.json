@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "claims": [
+    {"id": "guest-reshare", "text": "Guests cannot reshare a shared document.", "check_ids": []},
+    {"id": "all-paths", "text": "Every access path enforces the same restriction.", "check_ids": []}
+  ],
+  "assumptions": [
+    {"id": "guest-role", "text": "The role value 'guest' represents an external collaborator."}
+  ]
+}
