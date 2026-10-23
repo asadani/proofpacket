@@ -100,3 +100,7 @@ The package has no runtime dependencies. Core API entry points are `fingerprint_
 Report and initialization outputs refuse to overwrite their input artifacts or selected source files. Packet changes happen only through the explicit initialization, run, and link operations.
 
 See [verification coverage](docs/VERIFICATION.md) and [the design plan](docs/PLAN.md) for tested behavior and remaining limits.
+
+## License
+
+Licensed under the [MIT License](LICENSE). Copyright (c) 2026 Anuj Sadani.
