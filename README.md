@@ -1,4 +1,6 @@
-<p align="center"><img src="assets/logo.svg" alt="Proofpacket" width="310"></p>
+<p align="center">
+  <img src="assets/logo.svg" alt="Proofpacket — Evidence you can inspect" width="400" height="160">
+</p>
 
 Proofpacket records which local command ran against a selected set of files, what it returned, and whether those files still match the versions observed around the run. It gives reviewers inspectable evidence for a completion claim; it does not judge whether the claim is true.
 
